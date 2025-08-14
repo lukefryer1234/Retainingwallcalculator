@@ -1,10 +1,27 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 
 from .models import SoilType, SurchargeLoad
-from .serializers import CalculationInputSerializer
+from .serializers import CalculationInputSerializer, SoilTypeSerializer, SurchargeLoadSerializer
 from .services import calculate_retaining_wall_design
+
+
+class SoilTypeListView(generics.ListAPIView):
+    """
+    Read-only endpoint to list all available soil types.
+    """
+    queryset = SoilType.objects.all()
+    serializer_class = SoilTypeSerializer
+
+
+class SurchargeLoadListView(generics.ListAPIView):
+    """
+    Read-only endpoint to list all available surcharge loads.
+    """
+    queryset = SurchargeLoad.objects.all()
+    serializer_class = SurchargeLoadSerializer
+
 
 class RetainingWallCalculatorView(APIView):
     """

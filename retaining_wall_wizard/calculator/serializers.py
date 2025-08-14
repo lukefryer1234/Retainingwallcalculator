@@ -19,3 +19,19 @@ class CalculationInputSerializer(serializers.Serializer):
         if not value:
             raise serializers.ValidationError("You must confirm the property is not in a special area to proceed.")
         return value
+
+
+class SoilTypeSerializer(serializers.Serializer):
+    """
+    Serializer for the SoilType model, exposing id and name.
+    """
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+
+
+class SurchargeLoadSerializer(serializers.Serializer):
+    """
+    Serializer for the SurchargeLoad model, exposing id and name.
+    """
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
