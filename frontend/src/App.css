@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+.App-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.8rem;
+  color: #757575;
+  text-align: center;
+}
