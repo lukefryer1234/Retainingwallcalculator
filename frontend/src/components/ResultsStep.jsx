@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ResultsStep = ({ results, error }) => {
+const ResultsStep = ({ results, error, onDownloadPDF }) => {
   if (error) {
     return <div style={{ color: 'red' }}>Error: {error}</div>;
   }
@@ -38,6 +38,9 @@ const ResultsStep = ({ results, error }) => {
             <li>Sliding: {engineering_design.calculations.safety_factor_sliding} (Required: {'>='} {engineering_design.required_sf.sliding})</li>
             <li>Bearing Pressure: {engineering_design.calculations.max_bearing_pressure_kPa} kPa (Max allowable: {engineering_design.required_sf.bearing_capacity_kPa} kPa)</li>
            </ul>
+           <button onClick={onDownloadPDF} style={{ marginTop: '20px', padding: '10px', cursor: 'pointer' }}>
+             Download PDF Report (£9.99)
+           </button>
         </div>
       )}
 

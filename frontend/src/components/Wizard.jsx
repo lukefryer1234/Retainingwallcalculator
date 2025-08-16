@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RegulatoryGatewayStep from './RegulatoryGatewayStep';
 import WallAndSoilStep from './WallAndSoilStep';
 import ResultsStep from './ResultsStep';
-import { getSoilTypes, getSurchargeLoads, postCalculation } from '../api';
+import { getSoilTypes, getSurchargeLoads, postCalculation, generatePDF } from '../api';
 
 const Wizard = () => {
   const [step, setStep] = useState(1);
@@ -60,6 +60,28 @@ const Wizard = () => {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await generatePDF(formData);
+      // Create a blob from the PDF stream
+      const file = new Blob([response.data], { type: 'application/pdf' });
+      // Build a URL from the file
+      const fileURL = URL.createObjectURL(file);
+      // Create a temporary link to trigger the download
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.setAttribute('download', 'retaining_wall_report.pdf');
+      document.body.appendChild(link);
+      link.click();
+      // Clean up
+      link.parentNode.removeChild(link);
+      URL.revokeObjectURL(fileURL);
+    } catch (err) {
+      setError('Failed to generate PDF.');
+      console.error(err);
+    }
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -67,7 +89,7 @@ const Wizard = () => {
       case 2:
         return <WallAndSoilStep formData={formData} handleChange={handleChange} soilTypes={soilTypes} surchargeLoads={surchargeLoads} />;
       case 3:
-        return <ResultsStep results={results} error={error} />;
+        return <ResultsStep results={results} error={error} onDownloadPDF={handleDownloadPDF} />;
       default:
         // Allow restarting the wizard
         setStep(1);

@@ -25,3 +25,9 @@ export const getSurchargeLoads = () => {
 export const postCalculation = (data) => {
   return apiClient.post('/calculate/', data);
 };
+
+export const generatePDF = (data) => {
+  return apiClient.post('/generate-pdf/', data, {
+    responseType: 'blob', // Important for handling file downloads
+  });
+};

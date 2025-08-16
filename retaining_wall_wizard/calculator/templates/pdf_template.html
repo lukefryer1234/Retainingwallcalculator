@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Retaining Wall Specification Report</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 90%; margin: auto; }
+        h1, h2, h3 { color: #2c3e50; }
+        h1 { text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .section h2 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        ul { list-style-type: none; padding-left: 0; }
+        li { margin-bottom: 8px; }
+        li strong { color: #555; min-width: 250px; display: inline-block; }
+        .disclaimer { font-size: 0.8em; color: #7f8c8d; border-top: 1px solid #ccc; padding-top: 15px; margin-top: 30px; }
+        .flag { padding: 15px; border-radius: 5px; color: white; margin-bottom: 15px; }
+        .flag-RED { background-color: #e74c3c; }
+        .flag-ORANGE { background-color: #f39c12; }
+        .flag-GREEN { background-color: #2ecc71; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Retaining Wall Specification Report</h1>
+
+        <div class="section">
+            <h2>Regulatory Checklist</h2>
+            {% for flag in regulatory_gateway %}
+                <div class="flag flag-{{ flag.level }}">
+                    <strong>{{ flag.level }}:</strong> {{ flag.message }}
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if engineering_design.status == 'OK' %}
+            <div class="section">
+                <h2>Project Inputs</h2>
+                <ul>
+                    <li><strong>Wall Height:</strong> {{ engineering_design.inputs.wall_height }} m</li>
+                    <li><strong>Retained Soil Type:</strong> {{ engineering_design.inputs.soil_type }}</li>
+                    <li><strong>Surcharge Load:</strong> {{ engineering_design.inputs.surcharge_load }}</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Design Specifications (per meter of wall length)</h2>
+                <h3>Foundation</h3>
+                <ul>
+                    <li><strong>Required Foundation Width:</strong> {{ engineering_design.design_specifications.foundation_width }} m</li>
+                    <li><strong>Required Foundation Depth:</strong> {{ engineering_design.design_specifications.foundation_depth }} m</li>
+                    <li><strong>Concrete Mix Specification:</strong> {{ engineering_design.design_specifications.concrete_mix }}</li>
+                </ul>
+                <h3>Wall Reinforcement (for Concrete Blocks)</h3>
+                <ul>
+                    <li><strong>Vertical Rebar Size:</strong> {{ engineering_design.design_specifications.vertical_rebar_size }}</li>
+                    <li><strong>Vertical Rebar Spacing:</strong> {{ engineering_design.design_specifications.vertical_rebar_spacing }}</li>
+                    <li><strong>Horizontal 'Bed-Joint' Rebar:</strong> {{ engineering_design.design_specifications.horizontal_rebar }}</li>
+                    <li><strong>Concrete Infill Requirement:</strong> {{ engineering_design.design_specifications.concrete_infill }}</li>
+                </ul>
+                <h3>Drainage</h3>
+                 <ul>
+                    <li><strong>Perforated Land Drain:</strong> {{ engineering_design.design_specifications.drainage_pipe }}</li>
+                    <li><strong>Drainage Aggregate Backfill:</strong> {{ engineering_design.design_specifications.drainage_aggregate }}</li>
+                    <li><strong>Weep Holes:</strong> {{ engineering_design.design_specifications.weep_holes }}</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Engineering Checks</h2>
+                 <ul>
+                    <li><strong>Safety Factor vs Overturning:</strong> {{ engineering_design.calculations.safety_factor_overturning }} (Required: &ge;{{ engineering_design.required_sf.overturning }})</li>
+                    <li><strong>Safety Factor vs Sliding:</strong> {{ engineering_design.calculations.safety_factor_sliding }} (Required: &ge;{{ engineering_design.required_sf.sliding }})</li>
+                    <li><strong>Maximum Bearing Pressure:</strong> {{ engineering_design.calculations.max_bearing_pressure_kPa }} kPa (Allowable: {{ engineering_design.required_sf.bearing_capacity_kPa }} kPa)</li>
+                 </ul>
+            </div>
+        {% else %}
+             <div class="section">
+                <h2>Design Failed</h2>
+                <p>The provided wall dimensions and conditions did not meet the required safety factors. The design below is for information only and is not buildable.</p>
+                <p><strong>Please consult a structural engineer.</strong></p>
+             </div>
+        {% endif %}
+
+        <div class="disclaimer">
+            <p><strong>Disclaimer:</strong> This report is for preliminary design and informational purposes only. It is based on simplified assumptions and common rules of thumb for domestic retaining walls. The calculations do not replace the need for a site-specific survey and a design by a qualified structural engineer. The user assumes all risk and responsibility for the use of this information. Regulations last checked: [Date will go here].</p>
+        </div>
+    </div>
+</body>
+</html>
