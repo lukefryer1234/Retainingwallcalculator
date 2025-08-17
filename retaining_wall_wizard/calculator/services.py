@@ -1,4 +1,9 @@
 import math
+from rest_framework.response import Response
+from rest_framework import status
+from .models import SoilType, SurchargeLoad
+from .serializers import CalculationInputSerializer
+
 
 # --- Constants based on project brief & standard practice ---
 # Safety Factors
@@ -153,3 +158,70 @@ def calculate_retaining_wall_design(wall_height, soil, surcharge):
         }
     }
     return results
+
+
+def process_retaining_wall_request(request_data):
+    """
+    A unified service to handle a request, validate it, and return all results.
+    Returns a tuple of (result_data, error_response).
+    If successful, error_response will be None.
+    If an error occurs, result_data will be None.
+    """
+    serializer = CalculationInputSerializer(data=request_data)
+    if not serializer.is_valid():
+        return None, Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    validated_data = serializer.validated_data
+
+    try:
+        soil_type = SoilType.objects.get(pk=validated_data['soil_type_id'])
+        surcharge_load = SurchargeLoad.objects.get(pk=validated_data['surcharge_load_id'])
+    except (SoilType.DoesNotExist, SurchargeLoad.DoesNotExist):
+        return None, Response(
+            {"error": "Invalid soil_type_id or surcharge_load_id."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Engineering calculations
+    engineering_design = calculate_retaining_wall_design(
+        wall_height=validated_data['wall_height'],
+        soil=soil_type,
+        surcharge=surcharge_load
+    )
+
+    # Regulatory gateway checks
+    flags = []
+    wall_height = validated_data['wall_height']
+    if wall_height > 1.0 and validated_data['is_adjacent_to_highway']:
+        flags.append({
+            "level": "RED",
+            "message": "STOP: Planning Permission is likely required as the wall is over 1m high and next to a highway. Consult Powys County Council."
+        })
+    if wall_height > 2.0:
+        flags.append({
+            "level": "RED",
+            "message": "STOP: Planning Permission is likely required as the wall is over 2m high. Consult Powys County Council."
+        })
+    if wall_height > 1.5:
+        flags.append({
+            "level": "ORANGE",
+            "message": "CAUTION: Building Regulations approval is likely required as the wall is retaining over 1.5m of earth. The calculations provided are for guidance only and must be verified by a structural engineer."
+        })
+    if wall_height > 1.37 and validated_data['is_within_3_7m_of_street']:
+         flags.append({
+            "level": "ORANGE",
+            "message": "CAUTION: Approval under the Highways Act 1980 is likely required. Consult Powys County Council's highways department."
+        })
+    if not flags:
+        flags.append({
+            "level": "GREEN",
+            "message": "Good to Go! Your project appears to fall within permitted development."
+        })
+
+    # Compile the final response data
+    final_data = {
+        "regulatory_gateway": flags,
+        "engineering_design": engineering_design
+    }
+
+    return final_data, None
