@@ -1,0 +1,23 @@
+runtime: python312
+
+entrypoint: gunicorn -b :$PORT retaining_wall_wizard.wsgi:application
+
+instance_class: F1
+
+handlers:
+# The /api URLs are handled by the Django application
+- url: /api/.*
+  script: auto
+  secure: always
+
+# The static files from the frontend build
+- url: /(.*\.(js|css|svg|png|ico|json))$
+  static_files: frontend/dist/\1
+  upload: frontend/dist/.*\.(js|css|svg|png|ico|json)$
+  secure: always
+
+# All other URLs are handled by the React app's index.html
+- url: /.*
+  static_files: frontend/dist/index.html
+  upload: frontend/dist/index.html
+  secure: always
